@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>人群管理</title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="lib/element-ui/css/index.css">
+    <script src="lib/vue.js"></script>
+    <script src="lib/element-ui/js/index.js"></script>
+    <script src="lib/vue-resource.min.js"></script>
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+        html {
+            width: 100%;
+            height: 100%;
+        }
+        body {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+        }
+        input[placeholder], [placeholder], *[placeholder] {
+            color:#999 !important;
+        }
+       /*条件搜索框start*/
+       /*修改input框默认样式*/
+        .search-box {
+            margin-bottom:30px;
+        }
+        .search-box .el-button + .el-button {
+            margin-left: 0;
+        }
+        .search-box  .el-input {
+            height:34px;
+            position: relative;
+            font-size: 14px;
+            display: inline-block;
+        }
+        .search-box .el-input__inner {
+            height:32px;
+            border:0 none;
+            border-radius: 0;
+            color:#999999;
+        }
+        .search-box .search-select {
+            width: 160px;
+            height: 34px;
+            color:#a9a9a9;
+            border:1px solid #d1d5d8;
+            -webkit-border-radius:2px;
+            -moz-border-radius:2px;
+             border-radius:2px;
+             margin-right:30px;
+            box-sizing: border-box;
+        }
+        .search-box .crowd-name {
+            width: 258px;
+            color:#a9a9a9;
+            border:1px solid #d1d5d8;
+            margin-right:30px;
+            box-sizing: border-box;
+        }
+        .search-box   .el-select .el-input .el-input__icon {
+            color:#444444;
+        }
+        .search-box  .el-button {
+            padding:0;
+            border:0 none;
+        }
+        .search-box .search-btn {
+            width: 34px;
+            height: 34px;
+            position:absolute;
+            right:0;
+            top: 0;
+            background-color: #2d353c;
+            border-radius:0 2px 2px 0;
+        }
+        .search-box .action-btn,.search-box .event-btn {
+            width: 160px;
+            height: 34px;
+            margin-right: 30px;
+        }
+       /*人群列表*/
+       .crowd-list {
+           text-align:center;
+       }
+        .crowd-list ul  li {
+            font-size: 14px;
+            line-height: 39px;
+            color:#666666;
+            border-bottom:1px  solid #c5ced8;
+        }
+        .crowd-list a {
+            cursor: pointer;
+        }
+        .el-switch__core, .el-switch__label {
+            height:20px;
+        }
+
+        .crowd-list .first .grid-content {
+            line-height: 38px;
+            color:#fff;
+            background-color: #242a30;
+        }
+       .crowd-list li .grid-content {
+           min-width: 6px;
+           overflow: hidden; /*自动隐藏文字*/
+           text-overflow: ellipsis;/*文字隐藏后添加省略号*/
+           white-space: nowrap;/*强制不换行*/
+
+       }
+        .crowd-list ul  li:nth-child(odd) .grid-content {
+            background-color: #fff;
+        }
+        .crowd-list ul  li:nth-child(even) .grid-content {
+            background-color: #f0f3f5;
+        }
+       .crowd-list ul  li .font_blue {
+           color:#348fe2;
+       }
+       .el-switch__label--right {
+           border:1px solid #e4e4e4;
+           border-radius: 40px;
+       }
+        .el-switch__core .el-switch__button {
+            border:1px solid #e4e4e4;
+        }
+       /*分页样式*/
+       .pagination{
+           position:absolute;
+           bottom:70px;
+           right:0;
+       }
+       /*条件搜索框end*/
+    </style>
+</head>
+<body>
+<div id="app" v-cloak style="position:relative;height:100%;min-height: 300px;">
+   <!--条件搜索框-->
+    <div class="search-box">
+        <template>
+            <el-select v-model="channelSelect" class="search-select">
+                <el-option
+                        v-for="item in channelOpt"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                        :disabled="item.disabled">
+                </el-option>
+            </el-select>
+        </template>
+        <template>
+            <el-select v-model="statusSelect" class="search-select">
+                <el-option
+                        v-for="item in statusOpt"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                        >
+                </el-option>
+            </el-select>
+        </template>
+        <div  style="position:relative;width: 258px;height:34px;display: inline-block;margin-right: 30px;">
+            <el-input v-model="crowd" placeholder="请输入人群名称" class="crowd-name"></el-input>
+            <el-button type="primary" class="search-btn" style="">搜索</el-button>
+        </div>
+        <el-button type="primary" class="action-btn"><i class="el-icon-document"></i>按行为创建标签</el-button>
+        <el-button type="primary" class="event-btn" style="margin-right:0;">按事件创建标签</el-button>
+    </div>
+        <div class="crowd-list">
+            <div class="first">
+                <el-col :span="3"><div class="grid-content">人群名称</div></el-col>
+                <el-col :span="3"><div class="grid-content">人群类型</div></el-col>
+                <el-col :span="4"><div class="grid-content">有效日期</div></el-col>
+                <el-col :span="2"><div class="grid-content">同步渠道</div></el-col>
+                <el-col :span="2"><div class="grid-content">推送系统</div></el-col>
+                <el-col :span="2"><div class="grid-content">覆盖人数</div></el-col>
+                <el-col :span="2"><div class="grid-content">状态</div>   </el-col>
+                <el-col :span="4"><div class="grid-content">创建人</div></el-col>
+                <el-col :span="2"><div class="grid-content">操作</div>  </el-col>
+            </div>
+            <ul>
+                <li v-for="(item,index) in crowdData">
+                    <el-row>
+                        <el-col :span="3">
+                            <el-tooltip class="item" effect="dark" :content="item.name" placement="top">
+                                <div class="grid-content">{{item.name}}</div>
+                            </el-tooltip>
+                        </el-col>
+                        <el-col :span="3">
+                            <el-tooltip>
+                                <div class="grid-content font_blue">按行为标签</div></el-col>
+                            </el-tooltip>
+
+                        <el-col :span="4">
+                            <el-tooltip><div class="grid-content">2017/04/12-2020/04/12</div></el-tooltip>
+                        </el-col>
+                        <el-col :span="2">
+                            <el-tooltip><div class="grid-content">app-pus</div></el-tooltip></el-col>
+                        <el-col :span="2"><el-tooltip><div class="grid-content">ios</div></el-tooltip></el-col>
+                        <el-col :span="2">
+                            <el-tooltip><div class="grid-content">{{cover_user}}</div></el-tooltip></el-col>
+                        <el-col :span="2">
+                            <div class="grid-content">
+                                <div v-if="item.gq=='true'">
+                                124
+                               </div>
+                                <div v-else>
+                                    <el-switch
+                                            v-model="item.status"
+                                            on-text=""
+                                            off-text=""
+                                            :width="40"
+                                            on-color="#7cba59"
+                                            off-color="#fff">
+                                    </el-switch>
+                                </div></div>
+                        </el-col>
+                        <el-col :span="4">
+                            <el-tooltip><div class="grid-content">13412345678</div></el-tooltip></el-col>
+                        <el-col :span="2">
+                            <div class="grid-content">
+                                <a v-show="!item.status" @click="del(index)" class="font_blue">   <i class="el-icon-arrow-right"></i> 编辑</a>
+                                <a class="font_blue">查看</a></div>
+                        </el-col>
+                    </el-row>
+                </li>
+            </ul>
+        </div>
+        <div class="block pagination" >
+            <el-pagination
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page.sync="currentPage3"
+                    :page-size="2"
+                    layout="prev, pager, next, jumper"
+                    :total="table.length">
+            </el-pagination>
+        </div>
+
+</div>
+
+
+<script>
+    new Vue({
+        data: {
+            channelSelect: '全部同步渠道',
+            statusSelect:'全部状态',
+            crowd:'',
+            crowdData: [],
+            table:[],
+            currentPage3:1,
+            channelOpt: [
+                {
+                value: '短信',
+                label: '短信',
+                disabled: true
+            }, {
+                value: '邮件',
+                label: '邮件',
+                disabled: true
+            }, {
+                value: 'app-push',
+                label: 'app-push'
+            }, {
+                value: 'pc-dsp',
+                label: 'pc-dsp',
+                disabled: true
+            }, {
+                value: '移动dsp',
+                label: '移动dsp',
+                disabled: true
+            },{
+                value: '全部同步渠道',
+                label: '全部同步渠道'
+            }
+            ],
+            cover_user:'1234567',
+            statusOpt:[
+                {
+                    value: '全部状态',
+                    label: '全部状态'
+                },
+                {
+                    value: '未开启',
+                    label: '未开启'
+                },
+                {
+                    value: '开启',
+                    label: '开启'
+                },
+                {
+                    value: '过期',
+                    label: '过期'
+                }
+            ]
+
+        },
+        mounted: function () {
+            var _this=this;
+            this.$nextTick(function(){
+                this.cover_user=this.splitMethod(this.cover_user);
+                this.$http({
+                    url:'data.json',
+                }).then(function(data){
+                    data.body.forEach(function(val,index){
+                        _this.table.push(val);
+                    });
+                    console.log(data.body.length);
+                    for(var i=(this.currentPage3-1)*2;i<2;i++){
+                        if(_this.table[i]!=undefined){
+                            _this.crowdData.push( _this.table[i]);
+                        }
+                    }
+                },function(error){
+
+                })
+            })
+        },
+        methods: {
+            del:function (el){
+//                this.tableData.splice(el,1);
+            },
+            handleSizeChange:function(val) {
+//                console.log(`每页 ${val} 条`);
+            },
+            handleCurrentChange:function(val) {
+                console.log('当前页:' +val);
+                this.currentPage3=val;
+                console.log(typeof val);
+                this.crowdData.length=0;
+                for(var i=(val-1)*2;i<2*val;i++){
+                    console.log(this.table[i]);
+                    if(this.table[i]!=undefined){
+                        this.crowdData.push(this.table[i]);
+                    }
+
+
+                }
+
+            },
+            splitMethod:function(str){
+                var newStr = "";
+                var count = 0;
+                if(str.indexOf(".")==-1){
+                    for(var i=str.length-1;i>=0;i--){
+                        if(count % 3 == 0 && count != 0){
+                            newStr = str.charAt(i) + "," + newStr;
+                        }else{
+                            newStr = str.charAt(i) + newStr;
+                        }
+                        count++;
+                    }
+                    str = newStr; //自动补小数点后两位
+                }
+                else
+                {
+                    for(var i = str.indexOf(".")-1;i>=0;i--){
+                        if(count % 3 == 0 && count != 0){
+                            newStr = str.charAt(i) + "," + newStr;
+                        }else{
+                            newStr = str.charAt(i) + newStr; //逐个字符相接起来
+                        }
+                        count++;
+                    }
+                    str = newStr.substr((str).indexOf("."),3);
+                }
+                return str;
+            }
+        }
+
+    }).$mount('#app')
+</script>
+</body>
+</html>

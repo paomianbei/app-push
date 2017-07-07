@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>按事件创建标签</title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="lib/element-ui/css/index.css">
+    <script src="lib/vue.js"></script>
+    <script src="lib/element-ui/js/index.js"></script>
+    <script src="lib/vue-resource.min.js"></script>
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+        *[placeholder] {
+            color:#666666 !important;
+        }
+        .el-card__body {
+            padding:0;
+        }
+        .box-card {
+            margin-bottom:30px;
+        }
+        .box-card  .el-card__header {
+            line-height: 40px;
+            padding:0 20px;
+            color:#fff;
+            background-color: #232b2d;
+        }
+        .box-card  .el-form-item {
+            line-height:54px;
+            margin-bottom:0;
+            border-bottom:1px solid #c5ced7;
+        }
+        .box-card  .el-form-item:nth-child(odd) {
+            background-color: #fff;
+        }
+        .box-card .el-form-item:nth-child(even) {
+            background-color: #eff3f6;
+        }
+        .el-form-item  .el-form-item__label {
+            /*font-size:12px;*/
+            color:#333333;
+            padding:0 24px 0 0;
+            line-height: 54px;
+            border-right:1px solid #c5ced7;
+        }
+        .el-radio__label,.el-checkbox__label,.el-select-dropdown__item,.el-input {
+            /*font-size:12px;*/
+        }
+        .el-form-item  .el-form-item__content {
+            /*font-size: 12px;*/
+            color:#666666;
+            line-height: 54px;;
+            padding-left:24px;
+        }
+        .el-radio,.el-checkbox {
+            color:#666666;
+        }
+        .el-input__icon + .el-input__inner {
+            color:#666666;
+        }
+        .el-radio__inner {
+            width: 12px;
+            height: 12px;
+            border:1px solid #bcbabb;
+            background-color: #ebe7e6;
+        }
+        .el-radio__inner:hover {
+            border:1px solid #bcbabb;
+        }
+        .el-radio__input.is-checked .el-radio__inner {
+            border:1px solid #bcbabb;
+            background-color: #ebe7e6;
+        }
+        .el-radio__inner::after {
+            background-color: #535554;
+        }
+        .el-checkbox,.el-radio {
+            margin-right:30px;
+        }
+        .el-checkbox__inner {
+            width: 12px;
+            height: 12px;
+            background-color: #e0dedf;
+            border:1px solid #c9cacc;
+            border-radius: 1px;
+        }
+        .el-checkbox__input.is-checked .el-checkbox__inner {
+            background-color: #e0dedf;
+            border-color:#c9cacc;
+        }
+        .el-checkbox__inner::after {
+            height: 6px;
+            left:3px;
+            border-width:1px;
+            top:1px;
+            border-color: #272727;
+        }
+        .el-checkbox__inner:hover {
+            border-color: #e0dedf;
+        }
+        .el-checkbox__input.is-focus .el-checkbox__inner {
+            border-color:#c9cacc;
+        }
+        .el-date-editor.el-input {
+            width: 160px;
+            border-color: #d0d5d9;
+        }
+        .el-input__inner {
+            height:34px;
+        }
+        .el-select {
+            width: 160px;
+            margin-right:10px;
+        }
+        .el-select .el-input .el-input__icon {
+            color:#444444;
+        }
+        .el-select:hover .el-input__inner {
+            border-color:#d1d5d8;
+        }
+        .el-select .el-input__inner:focus {
+            border-color: #d1d5d8
+        }
+        .el-input.is-active .el-input__inner {
+            outline: 0;
+            border-color: #d1d5d8;
+        }
+        .el-input__inner:focus {
+            outline: 0;
+            border-color: #d1d5d8
+        }
+        .el-input {
+            width: 160px;
+            margin:0 5px;
+        }
+        .el-input:first-of-type {
+            margin-left:0;
+        }
+        .el-input__inner {
+            border-color:#d1d5d8;
+        }
+        .el-input:hover .el-input__inner {
+            border-color:#d1d5d8;
+        }
+        .el-input.is-focus .el-input__inner {
+            border-color:#d1d5d8;
+        }
+    </style>
+</head>
+<body>
+   <div id="app">
+       <!--选择用户标签-->
+       <el-card class="box-card">
+           <div slot="header" class="clearfix">
+               <span style="line-height: 36px;">选择用户标签</span>
+           </div>
+          <el-form label-width="200px">
+              <el-form-item label="用户类型">
+                  <el-radio-group v-model="form.usertype">
+                      <el-radio label="全部"></el-radio>
+                      <el-radio label="访客"></el-radio>
+                      <el-radio label="会员"></el-radio>
+                  </el-radio-group>
+              </el-form-item>
+          </el-form>
+       </el-card>
+       <!--基本信息设置-->
+       <el-card class="box-card">
+           <div slot="header" class="clearfix">
+               <span>基本信息设置</span>
+           </div>
+           <el-form ref="form" :model="form" label-width="200px">
+               <el-form-item label="人群名称">
+                   <el-input v-model="form.username"></el-input>
+               </el-form-item>
+               <el-form-item label="事件类型">
+                   <el-select v-model="form.eventtype" placeholder="请选择事件类型" @change="eventTypeChange">
+                       <el-option label="优惠券提醒" value="优惠券提醒"></el-option>
+                       <el-option label="生日关怀" value="生日关怀"></el-option>
+                       <el-option label="等级变更" value="等级变更"></el-option>
+                       <el-option label="签到提醒" value="签到提醒"></el-option>
+                       <el-option label="美豆提醒" value="美豆提醒"></el-option>
+                   </el-select>
+               </el-form-item>
+               <el-form-item label="触发规则" v-if="form.eventtype=='生日关怀'">
+                   <el-radio-group v-model="form.birthdayRule" >
+                       <el-radio label="前一天提醒"></el-radio>
+                       <el-radio label="前一周提醒"></el-radio>
+                       <el-radio label="当天提醒"></el-radio>
+                   </el-radio-group>
+               </el-form-item>
+               <el-form-item label="触发规则" v-else-if="form.eventtype=='优惠券提醒'">
+                   <el-radio-group v-model="form.couponRule" >
+                       <el-radio label="昨日到账未使用"></el-radio>
+                       <el-radio label="明日到期"></el-radio>
+                   </el-radio-group>
+               </el-form-item>
+               <el-form-item label="触发规则" v-else-if="form.eventtype=='签到提醒'">
+                  <span>近</span>
+                   <el-input v-model="form.signInRule.days" style="width:40px;"></el-input>
+                   <span>天</span>
+                   <el-select v-model="form.signInRule.type">
+                       <el-option label="连续" value="连续"></el-option>
+                       <el-option label="从未" value="从未"></el-option>
+                   </el-select>
+                   <span>签到</span>
+               </el-form-item>
+               <el-form-item label="触发规则" v-else-if="form.eventtype=='等级变更'">
+                   <span>近</span>
+                   <el-input v-model="form.levelRule.days" style="width:40px;"></el-input>
+                   <span>天</span>
+                   <span>等级</span>
+                   <el-select v-model="form.levelRule.type">
+                       <el-option label="升级" value="升级"></el-option>
+                       <el-option label="降级" value="降级"></el-option>
+                   </el-select>
+               </el-form-item>
+               <el-form-item label="触发规则" v-else="form.eventtype=='美豆提醒'">
+                   <el-select v-model="form.mdouRule.type" placeholder="请选择">
+                       <el-option label="小于" value="小于"></el-option>
+                       <el-option label="等于" value="等于"></el-option>
+                       <el-option label="大于" value="大于"></el-option>
+                       <el-option label="不小于" value="不小于"></el-option>
+                       <el-option label="不大于" value="不大于"></el-option>
+                       <el-option label="区间" value="区间"></el-option>
+                       <el-option label="不限" value="不限"></el-option>
+                   </el-select>
+                  <el-input v-model="form.mdouRule.countsStart" style="width:50px;"></el-input>
+                   <span>个</span>
+                   <div style="display: inline-block" v-if="form.mdouRule.type=='区间'">
+                       <span>---</span>
+                       <el-input v-model="form.mdouRule.countsEnd" style="width:50px;"></el-input>
+                       <span>个</span>
+                   </div>
+               </el-form-item>
+               <!--<el-form-item label="同步渠道" v-show="false">-->
+                   <!--<el-radio-group v-model="channel">-->
+                       <!--<el-radio label="邮件"></el-radio>-->
+                       <!--<el-radio label="短信"></el-radio>-->
+                       <!--<el-radio label="APP-PUSH"></el-radio>-->
+                       <!--<el-radio label="移动-DSP"></el-radio>-->
+                       <!--<el-radio label="PC-DSP"></el-radio>-->
+                   <!--</el-radio-group>-->
+               <!--</el-form-item>-->
+               <el-form-item label="推送平台">
+                   <el-checkbox-group v-model="form.pushPlatform">
+                       <el-checkbox label="国美在线" name="type"></el-checkbox>
+                       <el-checkbox label="国美plus" name="type"></el-checkbox>
+                   </el-checkbox-group>
+               </el-form-item>
+               <el-form-item label="推送系统">
+                   <el-checkbox-group v-model="form.pushSystem">
+                       <el-checkbox label="Android" name="type"></el-checkbox>
+                       <el-checkbox label="ios" name="type"></el-checkbox>
+                       <el-checkbox label="小米" name="type"></el-checkbox>
+                   </el-checkbox-group>
+               </el-form-item>
+               <el-form-item label="有效日期">
+                   <div class="block" >
+                       <span class="demonstration">默认</span>
+                       <el-date-picker
+                               v-model="form.effectiveData"
+                               type="daterange"
+                               placeholder="请选择有效时间"
+                               @change="date">
+                       </el-date-picker>
+                   </div>
+               </el-form-item>
+               <el-form-item label="推送频次">
+                   <el-radio-group v-model="form.pushTimes" @change="pushTimeChange">
+                       <el-radio label="不限制"></el-radio>
+                       <el-radio label="限定"></el-radio>
+                   </el-radio-group>
+                   <p style="display:inline-block" v-show="pushTimesShow">
+                       <el-input v-model="form.days" style="width:100px;"></el-input><span>天之内只发</span> <el-input v-model="form.counts" style="width:100px;" ></el-input> <span>次</span>
+                   </p>
+               </el-form-item>
+               <el-form-item label="群组排重">
+                   <el-radio-group v-model="form.group">
+                       <el-radio label="不排重"></el-radio>
+                       <el-radio label="排重"></el-radio>
+                   </el-radio-group>
+                   <template>
+                       <el-select
+                               v-model="selvalue"
+                               filterable
+                               remote
+                               placeholder="请输入关键词"
+                               :remote-method="remoteMethod"
+                               :loading="loading"
+                               @change="groupSelted">
+                           <el-option
+                                   v-for="item in groupOptions"
+                                   :key="item.value"
+                                   :label="item.label"
+                                   :value="item.value">
+                           </el-option>
+                       </el-select>
+                   </template>
+                   <ul>
+                       <li v-for="(item,index) in groupSel">
+                       <p style="display: inline-block;">{{item.value}}</p>  <el-input  :value="index+2" v-model="item.level" style="width:40px;"></el-input>
+                       </li>
+                   </ul>
+               </el-form-item>
+               <el-button @click="submit">保存人群</el-button>
+               <el-button @click="submit">取消</el-button>
+               <el-button @click="submit">覆盖人数</el-button>
+               <span>11111</span>
+           </el-form>
+       </el-card>
+   </div>
+   <script>
+       new Vue({
+            data:{
+                selvalue:'',
+                index:1,
+                channel:'APP-PUSH',
+                pushTimesShow:false,
+                channel:'APP-PUSH',
+                selfGroup:'本群组',
+                selfLevel:1,
+                form:{
+                    usertype:'全部',
+                    username:'',
+                    eventtype:'',
+                    birthdayRule:'前一天提醒',
+                    couponRule:'昨日到账未使用',
+                    signInRule:{days:'',type:'连续'},
+                    levelRule:{days:'',type:''},
+                    mdouRule:{type:'',countsStart:'',countsEnd:''},
+                    pushPlatform:['国美在线','国美plus'],
+                    pushSystem:['Android','ios','小米'],
+                    effectiveData:'',
+                    pushTimes:'不限制',
+                    days:'',
+                    counts:'',
+                    group:'不排重',
+                },
+                groupOptions: [],
+                groupSel:[{value:'本群组',level:1}],
+                list: [],
+                loading: false,
+                states: ["Alabama", "Alaska", "Arizona",
+                    "Arkansas", "California", "Colorado",
+                    "Connecticut", "Delaware", "Florida",
+                    "Georgia", "Hawaii", "Idaho", "Illinois",
+                        "中国"
+                ],
+                pickerOptions0: {
+                    disabledDate:function(time) {
+                        return time.getTime() < Date.now() - 8.64e7;
+                    }
+                }
+            },
+           mounted:function(){
+             var _this=this;
+             this.$nextTick(function(){
+                 _this.list=_this.states.map(function(item){
+                     return {value:item,label:item};
+                 })
+             })
+               console.log(this.splitMethod('1234567'));
+
+           },
+           computed:{
+
+           },
+           methods:{
+               date:function(){
+                   var startTime=this.form.effectiveData[0];
+                   var endTime=this.form.effectiveData[1];
+                   this.form.effectiveData[0]=this.timeChange(startTime);
+                   this.form.effectiveData[1]=this.timeChange(endTime);
+                   console.log(this.form.effectiveData);
+               },
+               timeChange:function(time){
+                   var date=new Date(time);
+                   Y=date.getFullYear()+'-';
+                   M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+                   D = (date.getDate()< 10 ? '0'+date.getDate() : date.getDate());
+                   time=Y+M+D
+                   return  time;
+               },
+               eventTypeChange:function(){
+
+               },
+               pushTimeChange:function(){
+                   if(this.form.pushTimes=='限定'){
+                       this.pushTimesShow=true;
+                   }else {
+                       this.pushTimesShow=false;
+                   }
+               },
+               remoteMethod:function(query) {
+                   var _this=this;
+                   if (query !== '') {
+                       this.loading = true;
+                       setTimeout(function(){
+                           _this.loading=false;
+                           _this.groupOptions=_this.list.filter(function(item){
+                               return item.label.toLowerCase().indexOf(query.toLowerCase())>-1
+                           })
+                       },200);
+                   } else {
+                       this.groupOptions = [];
+                   }
+               },
+               groupSelted:function(val){
+                  this.index++
+                   this.groupSel.push(
+                           {value:val, level: this.index}
+                   );
+               },
+               submit:function(){
+                       var formData = JSON.stringify(this.form); // 这里才是你的表单数据
+                   console.log(this.groupSel);
+                   console.log(formData);
+               },
+               splitMethod:function(str){
+                   var newStr = "";
+                   var count = 0;
+                   if(str.indexOf(".")==-1){
+                       for(var i=str.length-1;i>=0;i--){
+                           if(count % 3 == 0 && count != 0){
+                               newStr = str.charAt(i) + "," + newStr;
+                           }else{
+                               newStr = str.charAt(i) + newStr;
+                           }
+                           count++;
+                       }
+                       str = newStr; //自动补小数点后两位
+                   }
+                   else
+                   {
+                       for(var i = str.indexOf(".")-1;i>=0;i--){
+                           if(count % 3 == 0 && count != 0){
+                               newStr = str.charAt(i) + "," + newStr;
+                           }else{
+                               newStr = str.charAt(i) + newStr; //逐个字符相接起来
+                           }
+                           count++;
+                       }
+                       str = newStr.substr((str).indexOf("."),3);
+                   }
+                   return str;
+               }
+
+       }
+       }).$mount('#app');
+   </script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>main</title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="lib/element-ui/css/index.css">
+    <link rel="stylesheet" href="css/main.css">
+    <script src="lib/vue.js"></script>
+    <script src="lib/element-ui/js/index.js"></script>
+    <script src="lib/vue-resource.min.js"></script>
+</head>
+<body>
+<div id="app" v-cloak>
+    <!--头部导航start-->
+    <div class="nav">
+        <div class="title" :class="{show:show}" id="title">
+           <span> {{title}} </span>
+        </div>
+        <!--<div class="switch more" @click="more">-->
+            <!--<i class="el-icon-arrow-right"></i>-->
+        <!--</div>-->
+        <el-row class="row-bg" :class="{show:show}" id="tabMenu">
+                <el-col :lg="4" :sm="3" :xs="4">
+                    <div class="grid-content more" @click="more"><i class="el-icon-arrow-right"></i></div>
+                </el-col>
+                <el-col :lg="18" :sm="19" :xs="16">
+                    <div class="grid-content nav-menu" id="menuList">
+                        <template id="tip">
+                            <el-popover
+                                    ref="popover1"
+                                    placement="bottom"
+                                    width="200"
+                                    trigger="click"
+                                    content="此功能尚未开放!">
+                            </el-popover>
+                            <el-popover
+                                    ref="popover2"
+                                    placement="bottom"
+                                    width="200"
+                                    trigger="click"
+                                    content="此功能尚未开放!">
+                            </el-popover>
+                            <el-popover
+                                    ref="popover3"
+                                    placement="bottom"
+                                    width="200"
+                                    trigger="click"
+                                    content="此功能尚未开放!">
+                            </el-popover>
+                            <el-popover
+                                    ref="popover4"
+                                    placement="bottom"
+                                    width="200"
+                                    trigger="click"
+                                    content="此功能尚未开放!">
+                            </el-popover>
+                            <el-popover
+                                    ref="popover"
+                                    placement="bottom"
+                                    width="200"
+                                    trigger="click"
+                                    content="此功能尚未开放!">
+                            </el-popover>
+                        </template>
+                        <el-menu theme="dark" :default-active="activeIndex" class="el-menu-demo" mode="horizontal"
+                                 @select="handleSelect">
+                            <el-menu-item index="1" class="not-open"  v-popover:popover1><a href="javascript:void(0);" :class="{show:font}"><i class="el-icon-document"></i>用户洞察</a></el-menu-item>
+                            <el-menu-item index="2" class="not-open" v-popover:popover2><a href="javascript:void(0);" :class="{show:font}"><i class="el-icon-document"></i>商品洞察</a></el-menu-item>
+                            <el-menu-item index="3" class="not-open" v-popover:popover3><a href="javascript:void(0);" :class="{show:font}"><i class="el-icon-document"></i>商户洞察</a></el-menu-item>
+                            <!--<el-menu-item index="3"><a href="javascript:void(0);"><i class="el-icon-document"></i>商户洞察</a></el-menu-item>-->
+                            <el-menu-item index="4" class="not-open"  v-popover:popover4><a href="javascript:void(0);" :class="{show:font}"><i class="el-icon-document"></i>小区洞察</a></el-menu-item>
+                            <el-menu-item index="5"  ><a href="javascript:void(0);" :class="{show:font}"><i class="el-icon-document"></i>智能营销</a></el-menu-item>
+                            <el-menu-item index="6" class="not-open"  v-popover:popover><a href="javascript:void(0);" :class="{show:font}"><i class="el-icon-document"></i>微观画像查询</a></el-menu-item>
+                        </el-menu>
+                    </div>
+                </el-col>
+                <el-col :lg="2" :sm="2" :xs="4">
+                    <div class="grid-content exit" style="text-align: right;">退出登录</div>
+                </el-col>
+        </el-row>
+
+    </div>
+    <!--头部导航end-->
+    <!--侧边栏start-->
+    <div class="sidebar" :class="{show:show}">
+        <!--个人信息-->
+        <div class="persional-info">
+            <div class="img-wrap" >
+                <img :src="person.imgSrc" >
+            </div>
+            <h3>{{person.department}}</h3>
+            <p><span :class="{show:show}">{{person.job}}</span> <span :class="{show:show}">{{person.name}}</span></p>
+        </div>
+        <!--侧边栏菜单-->
+        <div class="sidebar-menu" >
+            <el-menu  class="el-menu-vertical-demo"  :default-openeds="activeIndex2"  default-active="1-1" @open="handleOpen"  id="open"
+                      v-if="sidebar==true">
+                <el-submenu index="1">
+                    <template slot="title"><i class="el-icon-message"></i>人群管理</template>
+                    <template class="group">
+                        <el-menu-item-group >
+                            <el-menu-item index="1-1" @click="iframe='management.html'"><i class="circle"></i>人群管理</el-menu-item>
+                            <el-menu-item index="1-2"  @click="iframe='action.html'"> <i class="circle"></i>按行为标签创建</el-menu-item>
+                            <el-menu-item index="1-3"  @click="iframe='event.html'"><i class="circle"></i>按事件创建</el-menu-item>
+                        </el-menu-item-group>
+                    </template>
+                </el-submenu>
+                <el-submenu index="2"   v-popover:popover5>
+                    <el-popover
+                            ref="popover5"
+                            placement="bottom"
+                            width="200"
+                            trigger="click"
+                            content="此功能尚未开放!">
+                    </el-popover>
+                    <template slot="title"><i class="el-icon-message"></i>营销效果监测 </template>
+                </el-submenu>
+            </el-menu>
+            <div v-else>
+                <el-menu class="el-menu-demo min-size" mode="horizontal" @select="handleSelect" >
+                    <el-submenu index="1">
+                        <template slot="title"><i class="el-icon-message"></i></template>
+                        <el-menu-item index="1-1">人群管理</el-menu-item>
+                        <el-menu-item index="1-2">按行为标签创建</el-menu-item>
+                        <el-menu-item index="1-3">按事件创建</el-menu-item>
+                    </el-submenu>
+                    <el-submenu index="2" v-popover:popover6>
+                        <el-popover
+                                ref="popover6"
+                                placement="bottom"
+                                width="100"
+                                trigger="hover"
+                                content="此功能尚未开放!">
+                        </el-popover>
+                        <template slot="title"><i class="el-icon-message"></i></template>
+                    </el-submenu>
+                </el-menu>
+            </div>
+        </div>
+    </div>
+    <!--侧边栏end-->
+    <div class="main" :class="{show:show}">
+        <iframe :src="iframe" id="myiframe"  frameborder="0" style="width: 100%;height:100%;"></iframe>
+    </div>
+</div>
+<script src="js/main.js"></script>
+<script>
+
+</script>
+</body>
+</html>

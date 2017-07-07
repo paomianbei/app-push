@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="lib/jquery.min.js"></script>
+</head>
+<body>
+ <button id="btn">submit</button>
+ <script>
+     $(function(){
+         $('#btn').on('click',function(){
+             $.ajax({
+                 url:'http://localhost:8082/first',
+                 type:'post',
+                 dataType: 'json',
+                 xhrFields:{withCredentials:true},
+                 success:function(data){
+                     console.log(data);
+                 }
+             })
+         })
+     })
+ </script>
+</body>
+</html>
