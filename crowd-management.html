@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>人群管理</title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="lib/iview/dist/styles/iview.css">
+    <style>
+        .ivu-btn {
+            height:34px;
+            border:0;
+        }
+       .crowd .ivu-select{
+           width:160px;
+           height: 34px;
+       }
+       .crowd .ivu-select .ivu-select-selection {
+           height:inherit;
+           border-radius:2px;
+       }
+       .crowd .search-box .search-input {
+           display: inline-block;
+           width: 258px;
+           height: 34px;
+           position: relative;
+       }
+       .crowd .search-box .search-input .ivu-btn {
+           width: 34px;
+           position: absolute;
+           right: 0;
+           top: 0;
+           color: #fff;
+           background-color: #2d353c;
+           border:0 none;
+           border-radius: 0 2px 2px 0;
+           padding:0;
+       }
+        .crowd .ivu-input-wrapper {
+            height: 34px;
+        }
+        .crowd .ivu-input {
+            height:inherit;
+        }
+
+    </style>
+</head>
+<body>
+<div id="app" v-cloak class="crowd">
+    <div class="search-box">
+        <i-select v-model="channelSelect">
+            <i-option value="短信" label="短信">短信</i-option>
+            <i-option value="邮件"  label="邮件">邮件</i-option>
+            <i-option value="app-push" label="邮件">app-push</i-option>
+            <i-option value="pc-dsp" label="pc-dsp">pc-dsp</i-option>
+            <i-option value="移动dsp" label="移动dsp">移动dsp</i-option>
+            <i-option value="全部同步渠道" label="全部同步渠道">全部同步渠道</i-option>
+        </i-select>
+        <i-select v-model="statusSelect">
+            <i-option value="全部状态" label="全部状态">全部状态</i-option>
+            <i-option value="未开启" label="未开启">未开启</i-option>
+            <i-option value="开启" label="开启">开启</i-option>
+            <i-option value="过期" label="过期">过期</i-option>
+        </i-select>
+        <div class="search-input">
+            <i-input placeholder="请输入人群名称" v-model="searchText"></i-input>
+            <i-button>搜索</i-button>
+        </div>
+        <i-button type="primary" icon="ios-search">创建人群</i-button>
+    </div>
+    <div class="crowd-list">
+        <div class="first">
+           <Row>
+               <i-col :span="3"><div class="grid-content">营销人群名称</div></i-col>
+               <i-col :span="3"><div class="grid-content">人群类型</div></i-col>
+               <i-col :span="4"><div class="grid-content">有效日期</div></i-col>
+               <i-col :span="2"><div class="grid-content">同步渠道</div></i-col>
+               <i-col :span="2"><div class="grid-content">覆盖人数</div></i-col>
+               <i-col :span="2"><div class="grid-content">状态</div>   </i-col>
+               <i-col :span="4"><div class="grid-content">创建人</div></i-col>
+               <i-col :span="2"><div class="grid-content">操作</div>  </i-col>
+           </Row>
+        </div>
+        <ul>
+            <li v-for="(item,index) in crowdData">
+                <Row>
+                    <i-col :span="3">
+                        <Tooltip  class="item" effect="dark" :content="item.name" placement="top">
+                            <div class="grid-content">{{item.name}}</div>
+                        </Tooltip>
+                    </i-col>
+                    <i-col :span="3">
+                        <Tooltip>
+                            <div class="grid-content font_blue">{{item.type}}</div>
+                    </Tooltip>
+                    </i-col>
+                    <i-col :span="4">
+                        <Tooltip><div class="grid-content">{{item.date}}</div></Tooltip>
+                    </i-col>
+                    <i-col :span="2">
+                        <Tooltip><div class="grid-content">{{item.channel}}</div></Tooltip></i-col>
+                    <i-col :span="2">
+                        <Tooltip><div class="grid-content">{{item.count}}</div></Tooltip></i-col>
+                    <i-col :span="2">
+                        <div class="grid-content">
+                            <div v-if="item.gq=='true'">
+                                124
+                            </div>
+                            <div v-else>
+                                <i-switch
+                                        v-model="item.status"
+                                        on-text=""
+                                        off-text=""
+                                        :width="40"
+                                        on-color="#7cba59"
+                                        off-color="#fff">
+                                </i-switch>
+                            </div></div>
+                    </i-col>
+                    <i-col :span="4">
+                        <Tooltip><div class="grid-content">13412345678</div></Tooltip></i-col>
+                    <i-col :span="2">
+                        <div class="grid-content">
+                            <a v-show="!item.status" @click="del(index)" class="font_blue">   <i class="el-icon-arrow-right"></i> 编辑</a>
+                            <a class="font_blue">查看</a></div>
+                    </i-col>
+                </Row>
+            </li>
+        </ul>
+    </div>
+</div>
+<script type="text/javascript" src="lib/jquery.min.js"></script>
+<script type="text/javascript" src="lib/vue.js"></script>
+<script type="text/javascript" src="lib/iview.min.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    new Vue({
+        data: {
+            channelSelect: '',
+            statusSelect:'',
+            searchText:'',
+            crowd:'',
+            crowdData: [],
+            table:[]
+        },
+        mounted: function () {
+            var _this=this;
+            this.$nextTick(function(){
+               axios({
+                    type:'get',
+                    url:'data.json',
+                }).then(function(res){
+                     res.data.forEach(function(val,index){
+                         _this.crowdData.push(val);
+                     })
+                    console.log(res.data);
+                }).catch(function(err){
+                   console.log(err);
+               })
+            })
+        },
+        methods: {
+            changePage:function (e) {
+                // 这里直接更改了模拟的数据，真实使用场景应该从服务端获取数据
+                this.tableData = this.data;
+                console.log(e);
+            },
+            pageSize:function(e){
+                console.log(e)
+            }
+        }
+
+    }).$mount('#app')
+</script>
+</body>
+</html>
